@@ -1,5 +1,6 @@
-//esteban mora
-// Andreas Hitt
+//Esteban Mora
+//Carlos Vega
+//Andreas Hitt
 #include <iostream>
 #include <fstream>
 #include <sstream>
