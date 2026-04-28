@@ -1,6 +1,7 @@
 
 #include "LinkedList.h"
 
+// Append a new room node to the end of the linked list.
 void LinkedList::addRoom(const Room& room) {
     auto newNode = std::make_shared<Node>(room);
     if (!head) {

@@ -1,6 +1,7 @@
 #include "Player.h"
 #include <algorithm>
 
+// Initialize the player with starting health, gold, and luck.
 Player::Player() : health(100), gold(50), luck(5) {}
 
 void Player::adjustHealth(int amount) { health += amount; }
@@ -46,18 +47,21 @@ int Player::findItemIndex(int targetValue) {
     return -1;
 }
 
+// Remove an item from inventory safely by index.
 void Player::removeItem(int index) {
     if(index >= 0 && index < (int)inventory.size()) {
         inventory.erase(inventory.begin() + index);
     }
 }
 
+// Sum the value of all inventory items.
 int Player::getTotalInventoryValue() const {
     int total = 0;
     for (const auto& item : inventory) total += item.getCalculatedValue();
     return total;
 }
 
+// Print current player stats and inventory contents.
 void Player::displayStatus() const {
     std::cout << "\n========================================\n";
     std::cout << " HP: " << health << " | Gold: " << gold << " | Luck: " << luck << "\n";

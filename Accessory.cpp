@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <iostream>
 
+// Create a hat with attributes based on its type.
 Accessory::Accessory(Type type)
     : type(type), protection(0), luckBonus(0), value(0) {
     switch (type) {
@@ -42,12 +43,14 @@ int Accessory::getValue() const {
     return value;
 }
 
+// Populate the hat list with the available accessory options.
 AccessoryManager::AccessoryManager() {
     hats.emplace_back(Accessory::Type::Fedora);
     hats.emplace_back(Accessory::Type::Cowboy);
     hats.emplace_back(Accessory::Type::Beanie);
 }
 
+// Print the available hat choices to the player.
 void AccessoryManager::displayHatOptions() const {
     std::cout << "\nChoose a hat for your adventure:\n";
     for (size_t i = 0; i < hats.size(); i++) {
@@ -58,11 +61,13 @@ void AccessoryManager::displayHatOptions() const {
     }
 }
 
+// Return pointer to the chosen hat, or nullptr when the choice is invalid.
 const Accessory* AccessoryManager::chooseHat(int choice) const {
     if (choice < 1 || choice > (int)hats.size()) return nullptr;
     return &hats[choice - 1];
 }
 
+// Sort hats by value using a simple selection sort.
 void AccessoryManager::sortHatsByValue() {
     for (size_t i = 0; i < hats.size(); i++) {
         size_t maxIdx = i;
@@ -75,6 +80,7 @@ void AccessoryManager::sortHatsByValue() {
     }
 }
 
+// Binary search the sorted hat list by value.
 int AccessoryManager::findHatIndex(int targetValue) const {
     int low = 0;
     int high = (int)hats.size() - 1;

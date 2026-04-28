@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+// Accessory models headwear options with protection, luck, and value stats.
 class Accessory {
 public:
     enum class Type {
@@ -13,11 +14,11 @@ public:
     };
 
 private:
-    Type type;
-    std::string name;
-    int protection;
-    int luckBonus;
-    int value;
+    Type type;               // The specific accessory type.
+    std::string name;        // Display name.
+    int protection;          // Defensive quality of the hat.
+    int luckBonus;           // Luck bonus granted when equipped.
+    int value;               // Monetary or comparative worth.
 
 public:
     Accessory(Type type = Type::Fedora);
@@ -28,9 +29,10 @@ public:
     int getValue() const;
 };
 
+// AccessoryManager holds a collection of hats and provides selection/search logic.
 class AccessoryManager {
 private:
-    std::vector<Accessory> hats;
+    std::vector<Accessory> hats;  // Stores available hat choices.
 
 public:
     AccessoryManager();
