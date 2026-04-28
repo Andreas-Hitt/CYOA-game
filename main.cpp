@@ -7,6 +7,7 @@
 #include "LinkedList.h"
 #include "Player.h"
 #include "RandomEvent.h"
+#include "Accessory.h"
 
 using namespace std;
 
@@ -53,6 +54,20 @@ int main() {
     LinkedList castle;
     Player player;
     RandomEvent events;
+    AccessoryManager hatManager;
+
+    hatManager.displayHatOptions();
+    cout << "\nSelect a hat (1-3): ";
+    int hatChoice;
+    if (cin >> hatChoice) {
+        const Accessory* hat = hatManager.chooseHat(hatChoice);
+        if (hat) {
+            cout << ">> You equipped the " << hat->getName() << "! Luck +" << hat->getLuckBonus() << "\n";
+            player.addLuck(hat->getLuckBonus());
+        } else {
+            cout << ">> Invalid choice, no hat equipped.\n";
+        }
+    }
 
     ifstream file("rooms.csv");
     string line;
