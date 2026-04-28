@@ -1,3 +1,8 @@
+/*
+Author: Andreas Hitt & Gemini
+Class: Player
+Description: Implementation of inventory management and stats.
+*/
 #include "Player.h"
 
 Player::Player() : health(100), gold(50), luck(5) {}
@@ -7,6 +12,10 @@ void Player::adjustGold(int amount) { gold += amount; }
 void Player::addLuck(int amount) { luck += amount; }
 void Player::addItem(Item item) { inventory.push_back(item); }
 
+/*
+Algorithm: Selection Sort
+Description: Sorts inventory by the calculated value (highest to lowest)
+*/
 void Player::sortInventoryByValue() {
     for (size_t i = 0; i < inventory.size(); i++) {
         size_t maxIdx = i;
@@ -19,6 +28,10 @@ void Player::sortInventoryByValue() {
     }
 }
 
+/*
+Algorithm: Binary Search
+Description: Searches for an item by name in the sorted inventory.
+*/
 int Player::findItemIndex(std::string itemName) {
     int low = 0, high = (int)inventory.size() - 1;
     while (low <= high) {
@@ -44,7 +57,8 @@ int Player::getTotalInventoryValue() const {
 
 void Player::displayStatus() const {
     std::cout << "\n========================================\n";
-    std::cout << " HP: " << health << " | Gold: " << gold << " | Inv Value: " << getTotalInventoryValue() << "\n";
+    std::cout << " HP: " << health << " | Gold: " << gold << " | Luck: " << luck << "\n";
+    std::cout << " Total Inv Value: $" << getTotalInventoryValue() << "\n";
     std::cout << " INV: ";
     if(inventory.empty()) std::cout << "Empty";
     for (const auto& item : inventory) {

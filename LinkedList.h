@@ -1,3 +1,8 @@
+/*
+Author: Andreas Hitt
+Class: LinkedList
+Description: Manages the game rooms using a linear linked list.
+*/
 #ifndef LINKEDLIST_H
 #define LINKEDLIST_H
 
@@ -16,7 +21,9 @@ private:
     std::shared_ptr<Node> head;
 public:
     LinkedList() : head(nullptr) {}
+
     void addRoom(const Room& room);
+    
     std::shared_ptr<Node> getHead() const { return head; }
 };
 
