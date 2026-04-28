@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -std=c++11 -Wall
 TARGET = adventure
-SOURCES = main.cpp LinkedList.cpp Room.cpp
+SOURCES = main.cpp LinkedList.cpp Room.cpp Player.cpp Item.cpp RandomEvent.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 
 all: $(TARGET)
