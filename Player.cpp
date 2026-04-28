@@ -18,13 +18,13 @@ Description: Sorts inventory by the calculated value (highest to lowest)
 */
 void Player::sortInventoryByValue() {
     for (size_t i = 0; i < inventory.size(); i++) {
-        size_t maxIdx = i;
+        size_t minIdx = i; 
         for (size_t j = i + 1; j < inventory.size(); j++) {
-            if (inventory[j].getCalculatedValue() > inventory[maxIdx].getCalculatedValue()) {
-                maxIdx = j;
+            if (inventory[j].name < inventory[minIdx].name) {
+                minIdx = j;
             }
         }
-        std::swap(inventory[i], inventory[maxIdx]);
+        std::swap(inventory[i], inventory[minIdx]);
     }
 }
 
