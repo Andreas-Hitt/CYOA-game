@@ -1,5 +1,5 @@
 /*
-Author: Andreas Hitt
+Author: Andreas Hitt & Gemini
 Class: LinkedList
 Description: Manages the game rooms using a linear linked list.
 */

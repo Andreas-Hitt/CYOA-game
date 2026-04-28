@@ -19,7 +19,7 @@ void RandomEvent::trigger(Player& player) {
 
     if (roll < 25) { 
         int dmg = (rand() % 15 + 10) - luckMod;
-        if (dmg < 0) dmg = 0;
+        if (dmg < 10) dmg = 10;
         std::cout << ">> [EVENT] A swarm of bats attacks! -" << dmg << " HP." << std::endl;
         player.adjustHealth(-dmg);
     } else if (roll > 75) { 

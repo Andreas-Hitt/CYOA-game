@@ -35,7 +35,7 @@ Description: Searches for an item by gold value
 int Player::findItemIndex(int targetValue) {
     int low = 0, high = (int)inventory.size() - 1;
     while (low <= high) {
-        int mid = low + (high - low) / 2;
+        int mid = (high + low) / 2;
         int midValue = inventory[mid].getCalculatedValue();
 
         if (midValue == targetValue) return mid;
