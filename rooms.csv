@@ -1,10 +1,10 @@
-Throne Room,A massive hall with a dusty throne.,Sit on throne;Search floor;Leave the room,Golden Crown
-Alchemy Lab,Vials of bubbling liquid line the walls.,Drink a potion;Search cabinets;Leave the room,Empty Flask
-The Barracks,Old bunks and rusted weapon racks.,Rest on bed;Search lockers;Leave the room,Iron Dagger
-Wine Cellar,Rows of aging barrels.,Open a barrel;Look behind crates;Leave the room,Vintage Wine
-The Pantry,Smells of rot and old grain.,Check sacks;Search the rafters;Leave the room,Dried Meat
-Grand Balcony,A windy view of the dark forest.,Shout into the wind;Inspect railing;Leave the room,Telescope
-Wizard Tower,Sparking magic fills the air.,Touch an orb;Read a scroll;Leave the room,Spellbook
-The Kennel,Empty cages and gnawed bones.,Search straw;Check the bowls;Leave the room,Leather Collar
-Royal Garden,Overgrown thorny roses.,Pick a flower;Search the fountain;Leave the room,Silver Spade
-The Vault,A heavy iron door stands ajar.,Crack the safe;Search the piles;Leave the room,Jeweled Ring
+Throne Room,A massive hall with a dusty throne.,Sit on throne;Search floor;Leave the room,Golden Crown,,,
+Alchemy Lab,Vials of bubbling liquid line the walls.,Drink a potion;Search cabinets;Leave the room,Empty Flask,,,
+The Barracks,Old bunks and rusted weapon racks.,Rest on bed;Search lockers;Visit Shop;Leave the room,Iron Dagger,Orc,30,8
+Wine Cellar,Rows of aging barrels.,Open a barrel;Look behind crates;Leave the room,Vintage Wine,,,
+The Pantry,Smells of rot and old grain.,Check sacks;Search the rafters;Leave the room,Dried Meat,,,
+Grand Balcony,A windy view of the dark forest.,Shout into the wind;Inspect railing;Leave the room,Telescope,,,
+Wizard Tower,Sparking magic fills the air.,Touch an orb;Read a scroll;Leave the room,Spellbook,Skeleton,25,6
+The Kennel,Empty cages and gnawed bones.,Search straw;Check the bowls;Leave the room,Leather Collar,Wolf,15,4
+Royal Garden,Overgrown thorny roses.,Pick a flower;Search the fountain;Visit Shop;Leave the room,Silver Spade,,,
+The Vault,A heavy iron door stands ajar.,Crack the safe;Search the piles;Visit Shop;Leave the room,Jeweled Ring,,,

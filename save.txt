@@ -1,0 +1,6 @@
+health=77
+money=86
+luck=9
+damage=10
+currentRoom=0
+inventory=Golden Crown

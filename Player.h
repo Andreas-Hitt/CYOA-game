@@ -5,36 +5,49 @@
 #include <string>
 #include <iostream>
 #include "Item.h"
+#include "Inventory.h"
 
+// Player stores the current player's state, inventory, and helper methods.
 class Player {
 private:
     int health;
     int money;
     int luck;
-    std::vector<Item> inventory;
+    int damage;
+    Inventory inventory;
 
 public:
-    Player() : health(100), money(50), luck(5) {}
+    // Initialize a new player with default stats.
+    Player();
 
-    void adjustHealth(int amount) { health += amount; }
-    void adjustMoney(int amount) { money += amount; }
-    void addLuck(int amount) { luck += amount; }
-    void addItem(Item item) { inventory.push_back(item); }
+    // Modify the player's health by a positive or negative amount.
+    void adjustHealth(int amount);
+    // Modify the player's money by a positive or negative amount.
+    void adjustMoney(int amount);
+    // Increase the player's luck stat.
+    void addLuck(int amount);
+    // Add an item to the player's inventory.
+    void addItem(Item item);
 
-    int getHealth() const { return health; }
-    int getLuck() const { return luck; }
-    int getInvSize() const { return (int)inventory.size(); }
-    bool isAlive() const { return health > 0; }
+    // Accessor methods for player stats.
+    int getHealth() const;
+    int getMoney() const;
+    int getLuck() const;
+    int getDamage() const;
+    int getInvSize() const;
+    bool isAlive() const;
     
-    void displayStatus() const {
-        std::string condition = (health < 30) ? "WOUNDED" : "HEALTHY";
-        std::cout << "\n========================================" << std::endl;
-        std::cout << " STATUS: " << condition << " | HP: " << health << " | Gold: " << money << " | Luck: " << luck << std::endl;
-        std::cout << " INV: ";
-        if(inventory.empty()) std::cout << "Empty";
-        for (const auto& item : inventory) std::cout << "[" << item.name << "] ";
-        std::cout << "\n========================================" << std::endl;
-    }
+    // Display the player's current status and inventory contents.
+    void displayStatus() const;
+
+    // Provide mutable and const access to the player's inventory.
+    Inventory& getInventory();
+    const Inventory& getInventory() const;
+
+    // Query whether the player has an item by name.
+    bool hasItem(const std::string& name);
+    // Remove an item by name from the player's inventory.
+    void removeItem(const std::string& name);
 };
 
 #endif
