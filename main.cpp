@@ -1,5 +1,7 @@
-//esteban mora
-// Andreas Hitt
+/*
+Author: Andreas Hitt & Esteban Mora
+Description: Main game engine. Manages room transitions and user input.
+*/
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -9,10 +11,10 @@
 
 using namespace std;
 
-// Function 1 & 2 (Player Focus)
 void displayPlayerReport(const Player& p) {
     p.displayStatus();
 }
+
 void handleSurvivalBonus(Player& p) {
     static int actions = 0;
     if (++actions % 3 == 0) {
@@ -21,7 +23,6 @@ void handleSurvivalBonus(Player& p) {
     }
 }
 
-// Function 3 & 4 (Item Focus)
 void processLoot(Player& p, Room& r) {
     if (!r.isSearched() && r.getItem().name != "None") {
         cout << ">> You scavenged a [" << r.getItem().name << "]!" << endl;
@@ -32,14 +33,7 @@ void processLoot(Player& p, Room& r) {
         cout << ">> This area has been thoroughly picked over." << endl;
     }
 }
-string getItemFlavorText(const Item& i) {
-    return "The " + i.name + " feels cold in your hands.";
-}
 
-// Function 5 & 6 (Event Focus)
-void executeEvent(RandomEvent& re, Player& p) {
-    re.trigger(p);
-}
 bool checkEventSafety(const Player& p) {
     if (p.getLuck() > 20) {
         cout << ">> Your intuition warns you of danger. You avoid a trap!" << endl;
@@ -76,8 +70,7 @@ int main() {
         while (getline(as, action, ';')) {
             actionList.push_back(action);
         }
-
-        castle.addRoom(Room(name, desc, actionList, Item(itemName)));
+        castle.addRoom(Room(name, desc, actionList, Item(itemName, 20))); 
     }
 
     auto curr = castle.getHead();
@@ -86,18 +79,38 @@ int main() {
         cout << curr->room.toString();
 
         int count = 1;
-        for (const auto& a : curr->room.getActions()) {
+        auto roomActions = curr->room.getActions();
+        for (const auto& a : roomActions) {
             cout << count++ << ". " << a << endl;
         }
+        cout << count << ". Organize/Check Bag (Sort & Search)" << endl;
 
         int choice;
-        cout << "\nChoose (1-" << curr->room.getActions().size() << "): ";
+        cout << "\nChoose (1-" << count << "): ";
         if (!(cin >> choice)) break;
 
-        if (choice == (int)curr->room.getActions().size()) {
+        if (choice == (int)roomActions.size()) {
+            // Last action in CSV is always "Leave"
             curr = curr->next;
+        } else if (choice == count) {
+            // Algorithm Demo: Sort and search by Value
+            cout << ">> Sorting inventory by value (Selection Sort)..." << endl;
+            player.sortInventoryByValue();
+            player.displayStatus();
+            
+            int searchValue;
+            cout << "Enter the gold value to search for: ";
+            if (!(cin >> searchValue)) {
+                cin.clear();
+                cin.ignore(1000, '\n');
+                cout << ">> Invalid input." << endl;
+            } else {
+                int idx = player.findItemIndex(searchValue);
+                if(idx != -1) cout << ">> Found item worth $" << searchValue << " at index " << idx << endl;
+                else cout << ">> No item found with that value." << endl;
+            }
         } else {
-            if (!checkEventSafety(player)) executeEvent(events, player);
+            if (!checkEventSafety(player)) events.trigger(player);
             processLoot(player, curr->room);
             handleSurvivalBonus(player);
         }
@@ -108,6 +121,6 @@ int main() {
         }
     }
 
-    cout << "\nCongratulations! You escaped the castle!" << endl;
+    cout << "\nCongratulations! You escaped the castle with $" << player.getTotalInventoryValue() << " in loot!" << endl;
     return 0;
 }

@@ -6,11 +6,12 @@
 class Item {
 public:
     std::string name;
-    std::string rarity;
-    int weight;
+    int baseValue;
+    float condition; 
+    std::string rarity; 
 
-    Item(std::string n = "None", std::string r = "Common", int w = 1) 
-        : name(n), rarity(r), weight(w) {}
+    Item(std::string n = "None", int val = 0, float cond = 1.0, std::string rar = "Common");
+    int getCalculatedValue() const;
 };
 
 #endif
