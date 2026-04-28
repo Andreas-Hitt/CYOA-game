@@ -18,27 +18,29 @@ Description: Sorts inventory by the calculated value (highest to lowest)
 */
 void Player::sortInventoryByValue() {
     for (size_t i = 0; i < inventory.size(); i++) {
-        size_t minIdx = i; 
+        size_t maxIdx = i; 
         for (size_t j = i + 1; j < inventory.size(); j++) {
-            if (inventory[j].name < inventory[minIdx].name) {
-                minIdx = j;
+            if (inventory[j].getCalculatedValue() > inventory[maxIdx].getCalculatedValue()) {
+                maxIdx = j;
             }
         }
-        std::swap(inventory[i], inventory[minIdx]);
+        std::swap(inventory[i], inventory[maxIdx]);
     }
 }
 
 /*
 Algorithm: Binary Search
-Description: Searches for an item by name in the sorted inventory.
+Description: Searches for an item by gold value
 */
-int Player::findItemIndex(std::string itemName) {
+int Player::findItemIndex(int targetValue) {
     int low = 0, high = (int)inventory.size() - 1;
     while (low <= high) {
         int mid = low + (high - low) / 2;
-        if (inventory[mid].name == itemName) return mid;
-        if (inventory[mid].name < itemName) low = mid + 1;
-        else high = mid - 1;
+        int midValue = inventory[mid].getCalculatedValue();
+
+        if (midValue == targetValue) return mid;
+        if (midValue < targetValue) high = mid - 1;
+        else low = mid + 1;
     }
     return -1;
 }

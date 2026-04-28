@@ -93,18 +93,22 @@ int main() {
             // Last action in CSV is always "Leave"
             curr = curr->next;
         } else if (choice == count) {
-            // Algorithm Demo: Sort and search
+            // Algorithm Demo: Sort and search by Value
             cout << ">> Sorting inventory by value (Selection Sort)..." << endl;
             player.sortInventoryByValue();
             player.displayStatus();
             
-            string searchName;
-            cout << "Search for an item by name: ";
-            cin.ignore();
-            getline(cin, searchName);
-            int idx = player.findItemIndex(searchName);
-            if(idx != -1) cout << ">> Found " << searchName << " at index " << idx << endl;
-            else cout << ">> Item not found." << endl;
+            int searchValue;
+            cout << "Enter the gold value to search for: ";
+            if (!(cin >> searchValue)) {
+                cin.clear();
+                cin.ignore(1000, '\n');
+                cout << ">> Invalid input." << endl;
+            } else {
+                int idx = player.findItemIndex(searchValue);
+                if(idx != -1) cout << ">> Found item worth $" << searchValue << " at index " << idx << endl;
+                else cout << ">> No item found with that value." << endl;
+            }
         } else {
             if (!checkEventSafety(player)) events.trigger(player);
             processLoot(player, curr->room);

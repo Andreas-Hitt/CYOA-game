@@ -26,7 +26,7 @@ public:
     int getInvSize() const { return (int)inventory.size(); }
     bool isAlive() const { return health > 0; }
     void sortInventoryByValue();
-    int findItemIndex(std::string itemName);
+    int findItemIndex(int targetValue);
     void removeItem(int index);
     int getTotalInventoryValue() const;
     void displayStatus() const;
