@@ -4,6 +4,8 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
+#include <algorithm>
+#include <limits>
 #include "LinkedList.h"
 #include "Player.h"
 #include "RandomEvent.h"
@@ -13,7 +15,7 @@
 
 using namespace std;
 
-// Logic Fix: Generates random stats for scavenged items
+// Logic: Generates random stats for scavenged items
 void processLoot(Player& p, Room& r) {
     if (!r.isSearched() && !r.getItems().empty()) {
         for (auto& item : r.getItems()) {
@@ -26,7 +28,6 @@ void processLoot(Player& p, Room& r) {
             else item.rarity = "Legendary";
 
             // 2. Roll for Quality (0.5 to 1.25)
-            // (rand() % 76) gives 0-75. Adding 50 gives 50-125. Divide by 100.0.
             item.condition = ((rand() % 76) + 50) / 100.0f;
 
             cout << ">> You scavenged a [" << item.rarity << "] " << item.name 
@@ -42,6 +43,9 @@ void processLoot(Player& p, Room& r) {
 }
 
 void visitShop(Shop& shop, Player& player) {
+    string inputLine;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear any leftover newline
+
     while (true) {
         cout << "\n--- CASTLE SHOP ---" << endl;
         shop.displayItems();
@@ -49,23 +53,24 @@ void visitShop(Shop& shop, Player& player) {
         cout << "Options: [buy <name>] [sell <name>] [leave]" << endl;
         cout << ">> ";
         
-        string cmd;
-        cin >> cmd;
-        if (cmd == "leave") break;
-        
-        string itemName;
-        cin >> itemName;
-        
+        getline(cin, inputLine);
+        if (inputLine == "leave" || inputLine.empty()) break;
+
+        stringstream ss(inputLine);
+        string cmd, itemName;
+        ss >> cmd;
+        getline(ss >> ws, itemName); // This correctly captures names like "Steel Sword"
+
         if (cmd == "buy") {
-            if (!shop.buyItem(itemName, player)) cout << ">> Cannot buy that." << endl;
+            if (!shop.buyItem(itemName, player)) cout << ">> Purchase failed." << endl;
         } else if (cmd == "sell") {
-            if (!shop.sellItem(itemName, player)) cout << ">> You don't have that." << endl;
+            if (!shop.sellItem(itemName, player)) cout << ">> Sale failed." << endl;
         }
     }
 }
 
 int main() {
-    srand(static_cast<unsigned int>(time(0))); // Seed RNG for looting
+    srand(static_cast<unsigned int>(time(0))); 
     LinkedList castle;
     Player player;
     RandomEvent events;
@@ -73,18 +78,23 @@ int main() {
     SaveSystem saveSystem;
     Shop shop;
 
+    // Default shop stock
     shop.addItem(Item("HealthPotion", "Common", 1, 15, 1.0f, 20));
     shop.addItem(Item("SteelSword", "Rare", 5, 40, 1.0f, 60));
 
     ifstream file("rooms.csv");
-    string line;
     if (!file.is_open()) {
         cout << "Error: rooms.csv not found!" << endl;
         return 1;
     }
 
+    string line;
     while (getline(file, line)) {
         if (line.empty()) continue;
+        
+        // Remove trailing \r if file was saved with Windows line endings
+        if (!line.empty() && line.back() == '\r') line.pop_back();
+
         stringstream ss(line);
         string name, desc, acts, itemName, eName, eHealth, eDmg, baseValStr;
         
@@ -95,24 +105,29 @@ int main() {
         getline(ss, eName, ',');
         getline(ss, eHealth, ',');
         getline(ss, eDmg, ',');
-        getline(ss, baseValStr); // New: Read base value from CSV
+        getline(ss, baseValStr, ',');
 
-        int baseVal = (baseValStr.empty()) ? 30 : stoi(baseValStr);
+        // Defensive stoi logic to prevent "std::invalid_argument" crashes
+        int baseVal = 30;
+        if (!baseValStr.empty()) {
+            try { baseVal = stoi(baseValStr); } catch (...) { baseVal = 30; }
+        }
 
+        vector<string> actionList;
         stringstream as(acts);
         string action;
-        vector<string> actionList;
         while (getline(as, action, ';')) actionList.push_back(action);
 
         vector<Item> roomItems;
-        if (itemName != "" && itemName != "None") {
-            // Initialize item with base value from CSV
+        if (!itemName.empty() && itemName != "None") {
             roomItems.push_back(Item(itemName, "Common", 1, 0, 1.0f, baseVal));
         }
 
         vector<Enemy> roomEnemies;
-        if (!eName.empty() && eName != "None") {
-            roomEnemies.push_back(Enemy(eName, stoi(eHealth), stoi(eDmg)));
+        if (!eName.empty() && eName != "None" && !eHealth.empty() && !eDmg.empty()) {
+            try {
+                roomEnemies.push_back(Enemy(eName, stoi(eHealth), stoi(eDmg)));
+            } catch (...) { /* Skip malformed enemy entries */ }
         }
 
         castle.addRoom(Room(name, desc, actionList, roomItems, roomEnemies));
@@ -122,15 +137,18 @@ int main() {
     size_t roomIdx = 0;
 
     cout << "Welcome to Castle Escape! Load save? (y/n): ";
-    char choice;
-    cin >> choice;
-    if (choice == 'y') {
+    char saveChoice;
+    cin >> saveChoice;
+    if (saveChoice == 'y' || saveChoice == 'Y') {
         size_t loadedIdx = 0;
         if (saveSystem.load(player, loadedIdx)) {
             for(size_t i = 0; i < loadedIdx && curr->next; ++i) {
                 curr = curr->next;
                 roomIdx++;
             }
+            cout << ">> Game Loaded!" << endl;
+        } else {
+            cout << ">> No save file found. Starting fresh." << endl;
         }
     }
 
@@ -148,13 +166,21 @@ int main() {
 
         int input;
         cout << "\nAction: ";
-        if (!(cin >> input)) break;
+        if (!(cin >> input)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            continue;
+        }
 
+        // Manage Bag logic
         if (input == actionCount + 1) {
-            cout << "1. Sort | 2. Search | 3. Save | 4. Back" << endl;
+            cout << "1. Sort | 2. Save | 3. Back" << endl;
             int sub; cin >> sub;
             if (sub == 1) player.sortInventoryByValue();
-            else if (sub == 3) saveSystem.save(player, roomIdx);
+            else if (sub == 2) {
+                saveSystem.save(player, roomIdx);
+                cout << ">> Progress Saved!" << endl;
+            }
             continue; 
         }
 
@@ -173,7 +199,7 @@ int main() {
             continue;
         } 
 
-        // Specific room actions trigger combat/loot
+        // Room Interactions (Combat & Loot)
         bool defeatedAll = true;
         for (auto& enemy : curr->room.getEnemies()) {
             if (!combat.fight(player, enemy)) {
@@ -189,8 +215,8 @@ int main() {
         }
     }
 
-    if (player.isAlive()) cout << "\n*** ESCAPED! ***" << endl;
-    else cout << "\n--- DEAD ---" << endl;
+    if (player.isAlive() && !curr) cout << "\n*** YOU ESCAPED THE CASTLE! ***" << endl;
+    else if (!player.isAlive()) cout << "\n--- YOU HAVE PERISHED ---" << endl;
 
     return 0;
 }

@@ -19,7 +19,12 @@ public:
 
     int getTotalWeight() const;
     int getSize() const;
-    const std::vector<Item>& getItems() const;
+    
+    // Read-only access for saving and displaying
+    const std::vector<Item>& getItems() const { return items; }
+    
+    // NEW: Mutable access so the Player can sort the items
+    std::vector<Item>& getItemsMutable() { return items; }
 };
 
 #endif
