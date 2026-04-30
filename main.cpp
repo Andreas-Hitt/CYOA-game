@@ -1,126 +1,172 @@
-/*
-Author: Andreas Hitt & Esteban Mora
-Description: Main game engine. Manages room transitions and user input.
-*/
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <vector>
 #include "LinkedList.h"
 #include "Player.h"
 #include "RandomEvent.h"
+#include "Shop.h"
+#include "Combat.h"
+#include "SaveSystem.h"
 
 using namespace std;
 
-void displayPlayerReport(const Player& p) {
-    p.displayStatus();
-}
-
-void handleSurvivalBonus(Player& p) {
-    static int actions = 0;
-    if (++actions % 3 == 0) {
-        cout << ">> SURVIVOR BONUS: +1 Luck!" << endl;
-        p.addLuck(1);
-    }
-}
+// --- Helper Functions ---
 
 void processLoot(Player& p, Room& r) {
-    if (!r.isSearched() && r.getItem().name != "None") {
-        cout << ">> You scavenged a [" << r.getItem().name << "]!" << endl;
-        p.addItem(r.getItem());
-        r.clearItem();
+    if (!r.isSearched() && !r.getItems().empty()) {
+        for (const auto& item : r.getItems()) {
+            cout << ">> You scavenged a [" << item.name << "]!" << endl;
+            p.addItem(item);
+        }
+        r.clearItems();
         r.setSearched(true);
     } else {
         cout << ">> This area has been thoroughly picked over." << endl;
     }
 }
 
-bool checkEventSafety(const Player& p) {
-    if (p.getLuck() > 20) {
-        cout << ">> Your intuition warns you of danger. You avoid a trap!" << endl;
-        return true;
-    }
-    return false;
+void visitShop(Shop& shop, Player& player) {
+    cout << "\n>> You enter the castle shop!" << endl;
+    shop.displayItems();
+    cout << "Options: buy <name>, sell <name>, leave" << endl;
+    // Simple shop interaction logic
+    string cmd;
+    cin >> cmd;
+    if (cmd == "leave") return;
+    string itemName;
+    cin >> itemName;
+    if (cmd == "buy") shop.buyItem(itemName, player);
+    else if (cmd == "sell") shop.sellItem(itemName, player);
 }
 
 int main() {
     LinkedList castle;
     Player player;
     RandomEvent events;
+    Combat combat;
+    SaveSystem saveSystem;
+    Shop shop;
 
+    // Add some default items to the shop
+    shop.addItem(Item("HealthPotion", "Common", 1, 15));
+    shop.addItem(Item("SteelSword", "Rare", 5, 40));
+
+    // --- Room Loading (CSV Parsing) ---
     ifstream file("rooms.csv");
     string line;
     if (!file.is_open()) {
-        cout << "Error: Place rooms.csv in the same folder as the exe." << endl;
+        cout << "Error: rooms.csv not found!" << endl;
         return 1;
     }
 
     while (getline(file, line)) {
         if (line.empty()) continue;
         stringstream ss(line);
-        string name, desc, acts, itemName;
+        string name, desc, acts, itemName, eName, eHealth, eDmg;
         
         getline(ss, name, ',');
         getline(ss, desc, ',');
         getline(ss, acts, ',');
-        getline(ss, itemName);
-        
+        getline(ss, itemName, ',');
+        getline(ss, eName, ',');
+        getline(ss, eHealth, ',');
+        getline(ss, eDmg);
+
         stringstream as(acts);
         string action;
         vector<string> actionList;
-        while (getline(as, action, ';')) {
-            actionList.push_back(action);
+        while (getline(as, action, ';')) actionList.push_back(action);
+
+        vector<Item> roomItems;
+        if (itemName != "" && itemName != "None") roomItems.push_back(Item(itemName));
+
+        vector<Enemy> roomEnemies;
+        if (!eName.empty()) {
+            roomEnemies.push_back(Enemy(eName, stoi(eHealth), stoi(eDmg)));
         }
-        castle.addRoom(Room(name, desc, actionList, Item(itemName, 20))); 
+
+        castle.addRoom(Room(name, desc, actionList, roomItems, roomEnemies));
     }
 
+    // --- Main Game Loop ---
     auto curr = castle.getHead();
+    size_t roomIdx = 0;
+
+    cout << "Welcome to Castle Escape! Load save? (y/n): ";
+    char choice;
+    cin >> choice;
+    if (choice == 'y') saveSystem.load(player, roomIdx);
+
     while (curr && player.isAlive()) {
-        displayPlayerReport(player);
+        player.displayStatus();
         cout << curr->room.toString();
 
-        int count = 1;
         auto roomActions = curr->room.getActions();
-        for (const auto& a : roomActions) {
-            cout << count++ << ". " << a << endl;
+        int actionCount = (int)roomActions.size();
+        
+        for (int i = 0; i < actionCount; ++i) {
+            cout << i + 1 << ". " << roomActions[i] << endl;
         }
-        cout << count << ". Organize/Check Bag (Sort & Search)" << endl;
+        cout << actionCount + 1 << ". Manage Bag (Sort/Search/Save)" << endl;
 
-        int choice;
-        cout << "\nChoose (1-" << count << "): ";
-        if (!(cin >> choice)) break;
+        int input;
+        cout << "\nAction: ";
+        if (!(cin >> input)) break;
 
-        if (choice == (int)roomActions.size()) {
-            // Last action in CSV is always "Leave"
-            curr = curr->next;
-        } else if (choice == count) {
-            // Algorithm Demo: Sort and search by Value
-            cout << ">> Sorting inventory by value (Selection Sort)..." << endl;
-            player.sortInventoryByValue();
-            player.displayStatus();
-            
-            int searchValue;
-            cout << "Enter the gold value to search for: ";
-            if (!(cin >> searchValue)) {
-                cin.clear();
-                cin.ignore(1000, '\n');
-                cout << ">> Invalid input." << endl;
-            } else {
-                int idx = player.findItemIndex(searchValue);
-                if(idx != -1) cout << ">> Found item worth $" << searchValue << " at index " << idx << endl;
-                else cout << ">> No item found with that value." << endl;
+        // OPTION: Manage Bag
+        if (input == actionCount + 1) {
+            cout << "1. Sort by Value | 2. Search Value | 3. Save | 4. Back" << endl;
+            int sub; cin >> sub;
+            if (sub == 1) player.sortInventoryByValue();
+            else if (sub == 2) {
+                int val; cout << "Value: "; cin >> val;
+                cout << "Index: " << player.findItemIndex(val) << endl;
             }
-        } else {
-            if (!checkEventSafety(player)) events.trigger(player);
-            processLoot(player, curr->room);
-            handleSurvivalBonus(player);
+            else if (sub == 3) saveSystem.save(player, roomIdx);
+            continue; 
         }
 
-        if (!player.isAlive()) {
-            cout << "\n*** GAME OVER ***\nYou died after finding " << player.getInvSize() << " items." << endl;
-            return 0;
+        // VALIDATE INPUT
+        if (input < 1 || input > actionCount) {
+            cout << "Invalid choice." << endl;
+            continue;
+        }
+
+        string chosenAction = roomActions[input - 1];
+
+        // OPTION: Leave the Room 
+        if (chosenAction == "Leave the room") {
+            curr = curr->next;
+            roomIdx++;
+            cout << ">> You move deeper into the castle..." << endl;
+            continue; 
+        }
+
+        // OPTION: Visit Shop 
+        if (chosenAction == "Visit Shop") {
+            visitShop(shop, player);
+            continue;
+        }
+
+        // DEFAULT: Combat and Looting for all other actions
+        bool defeatedAll = true;
+        for (auto& enemy : curr->room.getEnemies()) {
+            if (!combat.fight(player, enemy)) {
+                defeatedAll = false;
+                break;
+            }
+        }
+
+        if (player.isAlive() && defeatedAll) {
+            string eventMsg = events.trigger(player);
+            if (!eventMsg.empty()) cout << eventMsg << endl;
+            processLoot(player, curr->room);
         }
     }
 
-    cout << "\nCongratulations! You escaped the castle with $" << player.getTotalInventoryValue() << " in loot!" << endl;
+    if (player.isAlive()) cout << "You escaped!" << endl;
+    else cout << "Game Over." << endl;
+
     return 0;
 }

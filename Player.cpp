@@ -1,70 +1,56 @@
-/*
-Author: Andreas Hitt & Gemini
-Class: Player
-Description: Implementation of inventory management and stats.
-*/
 #include "Player.h"
+#include <algorithm>
 
-Player::Player() : health(100), gold(50), luck(5) {}
+Player::Player() : health(100), money(50), luck(5), damage(10) {}
 
 void Player::adjustHealth(int amount) { health += amount; }
-void Player::adjustGold(int amount) { gold += amount; }
+void Player::adjustMoney(int amount) { money += amount; }
 void Player::addLuck(int amount) { luck += amount; }
-void Player::addItem(Item item) { inventory.push_back(item); }
+void Player::addItem(Item item) { inventory.add(item); }
 
-/*
-Algorithm: Selection Sort
-Description: Sorts inventory by the calculated value (highest to lowest)
-*/
+int Player::getInvSize() const { return inventory.getSize(); }
+
+// Algorithm: Selection Sort (Andreas)
 void Player::sortInventoryByValue() {
-    for (size_t i = 0; i < inventory.size(); i++) {
-        size_t maxIdx = i; 
-        for (size_t j = i + 1; j < inventory.size(); j++) {
-            if (inventory[j].getCalculatedValue() > inventory[maxIdx].getCalculatedValue()) {
+    // We get a pointer to the vector inside the inventory class
+    // This allows us to sort it directly
+    std::vector<Item>& items = const_cast<std::vector<Item>&>(inventory.getItems());
+    
+    for (size_t i = 0; i < items.size(); i++) {
+        size_t maxIdx = i;
+        for (size_t j = i + 1; j < items.size(); j++) {
+            if (items[j].getCalculatedValue() > items[maxIdx].getCalculatedValue()) {
                 maxIdx = j;
             }
         }
-        std::swap(inventory[i], inventory[maxIdx]);
+        std::swap(items[i], items[maxIdx]);
     }
 }
 
-/*
-Algorithm: Binary Search
-Description: Searches for an item by gold value
-*/
+// Algorithm: Binary Search (Andreas)
 int Player::findItemIndex(int targetValue) {
-    int low = 0, high = (int)inventory.size() - 1;
+    const std::vector<Item>& items = inventory.getItems();
+    int low = 0, high = (int)items.size() - 1;
     while (low <= high) {
         int mid = (high + low) / 2;
-        int midValue = inventory[mid].getCalculatedValue();
-
-        if (midValue == targetValue) return mid;
-        if (midValue < targetValue) high = mid - 1;
+        int midVal = items[mid].getCalculatedValue();
+        if (midVal == targetValue) return mid;
+        if (midVal < targetValue) high = mid - 1;
         else low = mid + 1;
     }
     return -1;
 }
 
-void Player::removeItem(int index) {
-    if(index >= 0 && index < (int)inventory.size()) {
-        inventory.erase(inventory.begin() + index);
-    }
-}
-
-int Player::getTotalInventoryValue() const {
-    int total = 0;
-    for (const auto& item : inventory) total += item.getCalculatedValue();
-    return total;
-}
-
 void Player::displayStatus() const {
-    std::cout << "\n========================================\n";
-    std::cout << " HP: " << health << " | Gold: " << gold << " | Luck: " << luck << "\n";
-    std::cout << " Total Inv Value: $" << getTotalInventoryValue() << "\n";
+    std::string condition = (health < 30) ? "WOUNDED" : "HEALTHY";
+    
+    std::cout << "\n========================================" << std::endl;
+    std::cout << " STATUS: " << condition << " | HP: " << health 
+              << " | Gold: " << money << " | Luck: " << luck << std::endl;
     std::cout << " INV: ";
-    if(inventory.empty()) std::cout << "Empty";
-    for (const auto& item : inventory) {
-        std::cout << "[" << item.name << " ($" << item.getCalculatedValue() << ")] ";
+    if(inventory.getSize() == 0) std::cout << "Empty";
+    for (const auto& item : inventory.getItems()) {
+        std::cout << "[" << item.name << "] ";
     }
-    std::cout << "\n========================================\n";
+    std::cout << "\n========================================" << std::endl;
 }

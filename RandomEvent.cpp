@@ -1,33 +1,30 @@
-/*
-Author: Andreas Hitt & Gemini
-Class: RandomEvent
-Description: Implementation of randomized attrition events.
-*/
 #include "RandomEvent.h"
 
 RandomEvent::RandomEvent() {
     srand(static_cast<unsigned int>(time(0)));
 }
 
-/*
-Algorithm: Weighted Random Chance (Attrition Engine)
-Description: Uses a random roll modified by player stats to trigger events.
-*/
-void RandomEvent::trigger(Player& player) {
+// Algorithm: Weighted Random Chance (Attrition Engine)
+// This uses player Luck to mitigate damage, satisfying your feature requirements.
+std::string RandomEvent::trigger(Player& player) {
     int roll = rand() % 100;
     int luckMod = player.getLuck() / 2; 
 
-    if (roll < 25) { 
+    if (roll < 25) { // 25% Chance: Bad Event
         int dmg = (rand() % 15 + 10) - luckMod;
-        if (dmg < 10) dmg = 10;
-        std::cout << ">> [EVENT] A swarm of bats attacks! -" << dmg << " HP." << std::endl;
+        if (dmg < 5) dmg = 5; // Minimum damage floor
         player.adjustHealth(-dmg);
-    } else if (roll > 75) { 
+        return ">> [EVENT] A swarm of bats attacks! -" + std::to_string(dmg) + " HP.";
+    } 
+    else if (roll > 75) { // 25% Chance: Good Event
         int find = rand() % 25 + 5;
-        std::cout << ">> [EVENT] You found a loose pouch of " << find << " gold!" << std::endl;
-        player.adjustGold(find); 
-    } else if (roll > 45 && roll < 55) { 
-        std::cout << ">> [EVENT] You found a lucky charm! +2 Luck." << std::endl;
+        player.adjustMoney(find);
+        return ">> [EVENT] You found a loose pouch of " + std::to_string(find) + " gold!";
+    } 
+    else if (roll > 45 && roll < 55) { // 10% Chance: Luck gain
         player.addLuck(2);
+        return ">> [EVENT] You found a lucky charm! +2 Luck.";
     }
+    
+    return ""; // No event triggered
 }
