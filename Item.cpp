@@ -5,9 +5,11 @@ Item::Item(std::string n, std::string rar, int w, int p, float cond, int val)
 
 int Item::getCalculatedValue() const {
     float rarityMult = 1.0f;
-    if (rarity == "Rare") rarityMult = 2.0f;
-    else if (rarity == "Legendary") rarityMult = 5.0f;
+    if (rarity == "Uncommon") rarityMult = 1.5f;
+    else if (rarity == "Rare") rarityMult = 2.5f;
+    else if (rarity == "Epic") rarityMult = 4.0f;
+    else if (rarity == "Legendary") rarityMult = 7.0f;
     
-    // This keeps your original logic intact for the rubric
-    return static_cast<int>(baseValue * rarityMult * condition);
+    // Final Value = Base * Rarity Multiplier * Quality Modifier
+    return static_cast<int>((baseValue * rarityMult) * condition);
 }

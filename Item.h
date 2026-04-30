@@ -9,13 +9,11 @@ public:
     std::string rarity;
     int weight;
     int price;
-    float condition;
+    float condition; // Represents quality (0.0 to 1.0)
     int baseValue;
 
-    // The arguments are ordered to match the main.cpp calls: Name, Rarity, Weight, Price
     Item(std::string n = "None", std::string rar = "Common", int w = 1, int p = 0, float cond = 1.0, int val = 20);
     
-    // Your calculation algorithm
     int getCalculatedValue() const;
 };
 

@@ -1,5 +1,6 @@
 # Author: Andreas, Carlos, & Esteban
 # Description: Unified Makefile for Castle Escape
+# Updated to include all current project modules.
 
 CXX = g++
 CXXFLAGS = -std=c++11 -Wall
@@ -8,6 +9,7 @@ CXXFLAGS = -std=c++11 -Wall
 TARGET = adventure
 
 # ALL source files must be listed here to be compiled
+# Ensure any new .cpp files created are added to this list
 SOURCES = main.cpp \
           LinkedList.cpp \
           Room.cpp \
@@ -20,16 +22,17 @@ SOURCES = main.cpp \
           Item.cpp \
           Enemy.cpp
 
-# This automatically creates a list of .o files from the .cpp files
+# This automatically creates a list of .o (object) files from the .cpp files
 OBJECTS = $(SOURCES:.cpp=.o)
 
 # Default rule: compile the game
 all: $(TARGET)
 
+# Linking: Combines object files into the final executable
 $(TARGET): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJECTS)
 
-# Rule for individual object files
+# Compilation: Converts individual .cpp files into .o object files
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
@@ -37,7 +40,8 @@ $(TARGET): $(OBJECTS)
 run: $(TARGET)
 	./$(TARGET)
 
-# Clean rule to delete compiled files (run 'make clean' if you get weird errors)
+# Clean rule to delete compiled files
+# Use 'make clean' if you change a .h file or experience weird build errors
 clean:
 	rm -f $(OBJECTS) $(TARGET)
 

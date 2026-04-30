@@ -30,7 +30,12 @@ public:
     bool isAlive() const { return health > 0; }
     
     void displayStatus() const;
+    
+    // Non-const version (for when you want to modify items)
     Inventory& getInventory() { return inventory; }
+    
+    // Const version (FIX: This allows read-only access for SaveSystem)
+    const Inventory& getInventory() const { return inventory; }
     
     void sortInventoryByValue(); 
     int findItemIndex(int targetValue);

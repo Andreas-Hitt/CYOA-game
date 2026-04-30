@@ -14,9 +14,9 @@ bool Inventory::remove(const std::string& name) {
     return false;
 }
 
-// Algorithm: Bubble Sort (Carlos)
 void Inventory::bubbleSortByName() {
-    for (size_t i = 0; i < items.size(); ++i) {
+    if (items.empty()) return;
+    for (size_t i = 0; i < items.size() - 1; ++i) {
         for (size_t j = 0; j < items.size() - 1 - i; ++j) {
             if (items[j].name > items[j + 1].name) {
                 std::swap(items[j], items[j + 1]);
@@ -25,7 +25,6 @@ void Inventory::bubbleSortByName() {
     }
 }
 
-// Algorithm: Linear Search (Carlos)
 Item* Inventory::linearSearchByName(const std::string& name) {
     for (auto& item : items) {
         if (item.name == name) return &item;
