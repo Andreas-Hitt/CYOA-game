@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <iostream>
 
-// Create a hat with attributes based on its type.
+// Create a hat with attributes based on its type
 Accessory::Accessory(Type type)
     : type(type), protection(0), luckBonus(0), value(0) {
     switch (type) {
